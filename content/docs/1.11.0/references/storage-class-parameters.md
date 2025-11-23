@@ -78,6 +78,18 @@ Specifies the plugin that will be used for dynamic creation of persistent volume
 Note that some of these parameters also exist and may be specified in global settings.  When a volume is provisioned with Kubernetes against a particular StorageClass, StorageClass parameters override the global settings.
 These fields will be applied for new volume creation only.  If a StorageClass is modified, neither Longhorn nor Kubernetes is responsible for propagating changes to its parameters back to volumes previously created with it.
 
+### Access Mode Support
+
+Longhorn supports the following Kubernetes PersistentVolume access modes through the CSI driver:
+
+- **ReadWriteOnce (RWO)**: Default access mode. Volume can be mounted as read-write by a single node.
+- **ReadWriteOncePod (RWOP)**: Volume can be mounted as read-write by a single pod in the entire cluster. This provides the strongest isolation guarantee.
+- **ReadWriteMany (RWX)**: Volume can be mounted as read-write by many nodes simultaneously.
+
+> **Note**: ReadOnlyMany (ROX) is not supported by Longhorn. For read-only access from multiple pods, consider using ReadWriteMany with read-only mount options in your pod specification.
+
+The access mode is determined by the PVC's `accessModes` specification. Longhorn will automatically handle the volume creation and attachment according to the specified access mode.
+
 #### Number Of Replicas *(field: `parameters.numberOfReplicas`)*
 
 > Default: `3`

@@ -415,6 +415,18 @@ Those PVCs are created using a StorageClass, so they can be set up automatically
 
 When a StatefulSet scales down, the extra PVs/PVCs are kept in the cluster, and they are reused when the StatefulSet scales up again.
 
-The VolumeClaimTemplate is important for block storage solutions like EBS and Longhorn. Because those solutions are inherently [ReadWriteOnce,](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes) they cannot be shared between the Pods.
+The VolumeClaimTemplate is important for block storage solutions like EBS and Longhorn. Because those solutions are inherently [ReadWriteOnce](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes) or [ReadWriteOncePod](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes), they cannot be shared between the Pods.
 
 Deployments don't work well with persistent storage if you have more than one Pod running with persistent data. For more than one pod, a StatefulSet should be used.
+
+## Access Modes Support
+
+Longhorn supports the following Kubernetes PersistentVolume access modes:
+
+- **ReadWriteOnce (RWO)**: The volume can be mounted as read-write by a single node. Multiple pods on the same node can access the volume.
+- **ReadWriteOncePod (RWOP)**: The volume can be mounted as read-write by a single pod in the entire cluster. This provides the strongest isolation guarantee, ensuring only one pod can access the volume at any time.
+- **ReadWriteMany (RWX)**: The volume can be mounted as read-write by many nodes simultaneously, enabling shared access across multiple pods.
+
+> **Note**: ReadOnlyMany (ROX) is not supported by Longhorn. For read-only access from multiple pods, consider using ReadWriteMany with read-only mount options in your pod specification.
+
+The choice of access mode depends on your workload requirements. ReadWriteOncePod is particularly useful for stateful workloads that require single-writer access and need to prevent any other pod from accessing the volume, even on the same node.
